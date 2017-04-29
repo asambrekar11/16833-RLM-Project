@@ -1,6 +1,6 @@
 function [ pc_linkage ] = compute_linkage( pc_map,pc_range, theta1, theta2)
 %Calculate linkage based on the following code
-% proj_linkage = proj_linkage(:,:,right(1)||left(2)||bottom(3)||up(4));
+% proj_linkage = proj_linkage(:,:,right(1)||up(2)||left(3)||bottom(4));
 
 pc_linkage = zeros(size(pc_map,1),size(pc_map,2),4);
 
@@ -81,8 +81,8 @@ proj_linkage_u_1(isnan(proj_linkage_u_1)) = 0;
 
 %Final assignment of linkages
 pc_linkage(:,:,1) = proj_linkage_r_1;
-pc_linkage(:,:,2) = proj_linkage_l_1;
-pc_linkage(:,:,3) = proj_linkage_b_1;
-pc_linkage(:,:,4) = proj_linkage_u_1;
+pc_linkage(:,:,2) = proj_linkage_u_1;
+pc_linkage(:,:,3) = proj_linkage_l_1;
+pc_linkage(:,:,4) = proj_linkage_b_1;
 end
 
