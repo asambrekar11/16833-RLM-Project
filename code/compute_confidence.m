@@ -17,9 +17,9 @@ C_i_i3 = zeros(size(C_i_i1));
 C_i_i4 = zeros(size(C_i_i1));
 
 %Populating the distance vectors
-D_i_i1 = aug_pc_map(:,3:end,:) - aug_pc(:,2:end-1,:);
+D_i_i1 = aug_pc_map(:,3:end,:) - aug_pc_map(:,2:end-1,:);
 D_i_i2(2:end,:,:) = pc_map(1:end-1,:,:)-pc_map(2:end,:,:);
-D_i_i3 = aug_pc_map(:,1:end,:) - aug_pc(:,2:end-1,:);
+D_i_i3 = aug_pc_map(:,1:end-2,:) - aug_pc_map(:,2:end-1,:);
 D_i_i4(1:end-1,:,:) = pc_map(2:end,:,:)-pc_map(1:end-1,:,:);
 
 %Unit distance vectors
@@ -41,7 +41,8 @@ C_i_i3(isnan(C_i_i3)) = exp(-theta3*pi^2/4);
 C_i_i4(isnan(C_i_i4)) = exp(-theta3*pi^2/4);
 
 %Linkage maximum confidence
-L_max = max(pc_linkage(:,:,1).*pc_linkage(:,:,2),pc_linkage(:,:,2).*pc_linkage(:,:,3),pc_linkage(:,:,3).*pc_linkage(:,:,4),pc_linkage(:,:,4).*pc_linkage(:,:,1))
+
+L_max =max(max(pc_linkage(:,:,1).*pc_linkage(:,:,2),pc_linkage(:,:,2).*pc_linkage(:,:,3)),max(pc_linkage(:,:,3).*pc_linkage(:,:,4),pc_linkage(:,:,4).*pc_linkage(:,:,1)));
 
 %Output confidence at a pixel
 pc_confidence = min(L_max,max(C_i_i1.*C_i_i3,C_i_i2.*C_i_i4));
