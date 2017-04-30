@@ -3,7 +3,9 @@
 %  Final Project                         %
 %  Velodyne SLAM                         %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+close all
+clc
+clear
 %==== Only load data when needed ====
 if ~exist('seq_param_loaded')
     clear
@@ -32,7 +34,7 @@ positions = zeros(T, 3);
 %==== Set downsampling ratio for ICP ====
 ds_ratio = 9;
 
-for t = 1:10:100
+for t = 1:100
    
     %==== Display frame# ====
     fprintf('Frame#: %d', t);
@@ -47,7 +49,8 @@ for t = 1:10:100
     normals = computeNormal(pc_map,pc_linkage);
     
     %==== Get normal confidance counter in frame====%
-    %not found
+    [ pc_confidence ] = compute_confidence( pc_map,normals,pc_linkage,theta3);
+    
     
     pointcloud = pointCloud(pc_map);
     %==== Downsample input data ====
@@ -109,4 +112,6 @@ for t = 1:10:100
     last_pose = current_pose;
     
 end
+
+plotTrajAndMap(positions,fusion_map);
 
