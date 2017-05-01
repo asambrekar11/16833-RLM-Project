@@ -102,12 +102,12 @@ for t = 1:10:242
         positions(t, :) = current_pose.T(4, 1:3)';
         
         %==== Set the input data for mapping ====
-        input_data = struct('pointcloud', pointcloud, 'normals', normals, 'ccount', pc_ccount, 'range', pc_range);
+        input_data = struct('pointcloud', pointcloud, 'normals', normals, 'ccounts', pc_ccount, 'range', pc_range);
         
         %==== 2) Apply velo slam mapping to get a global fusion map and the next reference data ====
         if is_debug_icp == 0
             [fusion_map, ref_points, ref_normals] = velo_mapping(fusion_map, input_data, current_pose, flag, theta4, pt_th);
-            re_pointcloud = pointCloud(ref_points);
+            ref_pointcloud = pointCloud(ref_points);
         
         %==== DEBUG 2): A built-in pointcloud merging function for debugging ICP registration only
         else
