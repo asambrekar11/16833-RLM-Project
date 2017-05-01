@@ -12,35 +12,35 @@ Ci_cj = repmat(vec_pt_cloud.ccounts,[1,size(KD_tree_idx,2)]).*fusion_map.ccounts
 %Normal dot product
 vector_KD_idx = KD_tree_idx';
 vector_KD_idx = vector_KD_idx(:);
-Ni_nj = dot(kron(vec_pt_cloud.normals,[1:size(KD_tree_idx,2)]'),fusion_map.normals(vector_KD_idx,:),2);
+Ni_nj = dot(kron(vec_pt_cloud.normals,ones(size(KD_tree_idx,2),1)),fusion_map.normals(vector_KD_idx,:),2);
 Ni_nj = reshape(Ni_nj,[size(KD_tree_idx,2),size(vec_pt_cloud.normals,1)])';
 w_ij = Ci_cj.*Ni_nj;
 
-Pi_j_dot_nj = dot(kron(vec_pt_cloud.pointcloud,ones(size(KD_tree_idx,2),1))-fusion_map.pointcloud(vector_KD_idx,:),fusion_map.normals(vector_KD_idx,:),2);
+Pi_j_dot_nj = dot(kron(vec_pt_cloud.pointcloud.Location,ones(size(KD_tree_idx,2),1))-fusion_map.pointcloud.Location(vector_KD_idx,:),fusion_map.normals(vector_KD_idx,:),2);
 Pi_j_dot_nj = reshape(Pi_j_dot_nj,[size(KD_tree_idx,2),size(vec_pt_cloud.normals,1)])';
 
 a = sum(2*w_ij.*Pi_j_dot_nj.*Ni_nj,2)./sum(2*w_ij.*Ni_nj.^2,2);
 
-moved_vec_pt_cloud = vec_pt_cloud.pointcloud + repmat(a,[1 3]).*vec_pt_cloud.normals;
+moved_vec_pt_cloud = vec_pt_cloud.pointcloud.Location + repmat(a,[1 3]).*vec_pt_cloud.normals;
 
 
 %Need to add condition for invalid points
-dist_to_KD_matches = sum((fusion_map.pointcloud(vector_KD_idx,:)-kron(moved_vec_pt_cloud,ones(size(KD_tree_idx,2),1))).^2,2);
+dist_to_KD_matches = sum((fusion_map.pointcloud.Location(vector_KD_idx,:)-kron(moved_vec_pt_cloud,ones(size(KD_tree_idx,2),1))).^2,2);
 dist_to_KD_matches = reshape(dist_to_KD_matches,[size(KD_tree_idx,2),size(vec_pt_cloud.normals,1)])';
 
 %Finding the closest KNN
-[min_dist,min_idx] = min(dist_to_KD_matches,[],1);
+[min_dist,min_idx] = min(dist_to_KD_matches,[],2);
 
-linear_idx = sub2ind(size(dist_to_KD_matches),[1:size(dist_to_KD_matches,1)],min_idx)';
+linear_idx = sub2ind(size(dist_to_KD_matches),[1:size(dist_to_KD_matches,1)]',min_idx);
 closest_KD = dist_to_KD_matches(linear_idx);
 
 %Range check
-flag_range = (1-(fusion_map.range(KD_tree_idx(linear_idx))./vec_pt_cloud.range) + (vec_pt_cloud.ccounts - fusion_map.ccounts(linear_idx))) > theta4;
+flag_range = (1-(fusion_map.range(KD_tree_idx(linear_idx))./vec_pt_cloud.range) + (vec_pt_cloud.ccounts - fusion_map.ccounts(KD_tree_idx(linear_idx)))) > theta4;
 
 %Update the point if valid, close enough neighbors in the surface and high
 %confidence in the range measurement
-flag_update = and(vec_pt_cloud.flag,and(closest_KD < thresh_dist2,flag_range));
-flag_new_points = and(vec_pt_cloud.flag,~and(closest_KD < thresh_dist2,flag_range));
+flag_update = and(closest_KD < thresh_dist2,flag_range);
+flag_new_points = ~flag_update;
 idx_update_points = find(flag_update);
 idx_new_points = find(flag_new_points);
 
@@ -49,7 +49,7 @@ flag_fusion_to_keep = ones(size(fusion_map.ccounts,1),1);
 
 %Indexes to fusion map
 idx_fusion_list = KD_tree_idx(linear_idx);
-flag_fusion_to_keep(idx_fusion_list(find(flag_update))) = 0;
+flag_fusion_to_keep(idx_fusion_list(idx_update_points)) = 0;
 
 idx_fusion_to_keep = find(flag_fusion_to_keep);
 idx_pt_cloud_to_update = find(flag_update);
@@ -63,15 +63,18 @@ idx_pt_cloud_to_update = find(flag_update);
 
 %Fusion map to be updated based on flag_fusion_to_keep, adding new points
 %and adding updated points
-map_pointcloud = [fusion_map.pointcloud(idx_fusion_to_keep,:);vec_pt_cloud.pointcloud(idx_new_points,:);moved_vec_pt_cloud(idx_update_points,:)];
+map_pts = [fusion_map.pointcloud.Location(idx_fusion_to_keep,:);vec_pt_cloud.pointcloud.Location(idx_new_points,:);moved_vec_pt_cloud(idx_update_points,:)];
+map_pointcloud = pointCloud(map_pts);
 map_normals = [fusion_map.normals(idx_fusion_to_keep,:);vec_pt_cloud.normals(idx_new_points,:);vec_pt_cloud.normals(idx_update_points,:)];
 map_ccount = [fusion_map.ccounts(idx_fusion_to_keep);vec_pt_cloud.ccounts(idx_new_points);vec_pt_cloud.ccounts(idx_update_points)];
 map_range = [fusion_map.range(idx_fusion_to_keep);vec_pt_cloud.range(idx_new_points);vec_pt_cloud.range(idx_update_points)];
+
 new_fusion_map = struct('pointcloud', map_pointcloud, 'normals', map_normals,'ccounts', map_ccount,'range', map_range);
 
 %Refined point cloud to be updated based on flag_update
-frame_pointcloud = vec_pt_cloud.pointcloud; 
-frame_pointcloud(idx_update_points,:) = moved_vec_pt_cloud(idx_update_points,:);
+frame_pts = vec_pt_cloud.pointcloud.Location; 
+frame_pts(idx_update_points,:) = moved_vec_pt_cloud(idx_update_points,:);
+frame_pointcloud = pointCloud(frame_pts);
 frame_normals = vec_pt_cloud.normals;
 frame_ccount = vec_pt_cloud.ccounts;
 frame_range = vec_pt_cloud.range;

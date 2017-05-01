@@ -1,4 +1,4 @@
-function [fusion_map, next_ref_points, next_ref_normals] = velo_mapping(fusion_map, input_data, tform, flag, theta4, pt_th)     
+function [fusion_map, next_ref_points, next_ref_normals] = velo_mapping(fusion_map, input_data, tform, flag_invalid, theta4, pt_th)     
 
     %====flag is invalid vertex location
     
@@ -10,7 +10,7 @@ function [fusion_map, next_ref_points, next_ref_normals] = velo_mapping(fusion_m
     %==== Transform the input data for fusion ====
     trans_pointcloud = pctransform(input_data.pointcloud, tform); 
     trans_points = trans_pointcloud.Location;
-    trans_points(flag) = 0;
+    trans_points(flag_invalid) = 0;
     valid_idx = find(trans_points(:,:,1)~=0); %get index of valid points
 
     %========get valid points==============%
@@ -19,7 +19,7 @@ function [fusion_map, next_ref_points, next_ref_normals] = velo_mapping(fusion_m
     
     %=========get valid normals==============%
     trans_normals = nvRotate(input_data.normals, tform);
-    trans_normals(flag) = 0; 
+    trans_normals(flag_invalid) = 0; 
     trans_normals_vec = reshape(trans_normals,h*w,3);
     trans_normals_vec = trans_normals_vec(valid_idx,:);
     
