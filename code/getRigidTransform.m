@@ -1,4 +1,4 @@
-function [tform valid_pair_num error] = getRigidTransform(new_pointcloud, ref_pointcloud, ref_normals)
+function [tform valid_pair_num error] = getRigidTransform(new_pointcloud, ref_pointcloud, ref_normals, flag)
     
     %==== Initialize parameters ====
     iter_num = 6;
@@ -18,6 +18,7 @@ function [tform valid_pair_num error] = getRigidTransform(new_pointcloud, ref_po
         %==== (Notice: assoc_pts[] has the same size and format as new_pts[] and ref_pts[]) ====
         %==== (Notice: assoc_pts[i, j, :] = [0 0 0] iff no point in new_pts[] matches to ref_pts[i, j, :]) ====
         assoc_pts = findLocalClosest(new_pts, ref_pts, m, n, d_th);
+        assoc_pts(flag) = 0;
         
         %==== Set the sizes of matrix A[] and vertor b[] of normal equation: A'*A*x = A'*b ====
         A = zeros(m*n, 6);

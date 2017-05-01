@@ -1,4 +1,4 @@
-function [pc_map, pc_range] = projPCtoImg(msg) 
+function [pc_map, pc_range, flag] = projPCtoImg(msg) 
 %function to convert pointcloud2 into azimuth-elevation image
 %
 resolution_azi = 0.1;
@@ -22,6 +22,10 @@ pc_range(lin_idx,:) = sqrt(msg(:,1).^2+msg(:,2).^2+msg(:,3).^2);
 
 pc_map = reshape(pc_map,[h w 3]);
 pc_range = reshape(pc_range,[h w]);
+
+flag = find(pc_map(:,:,1)==0);
+
+flag = [flag;flag+h*w;flag+2*h*w];
 
 % range = sqrt(msg(:,1).^2+msg(:,2).^2+msg(:,3).^2);
 % scatter3(coord(:,2),coord(:,1),range,1);

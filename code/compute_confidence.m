@@ -23,10 +23,10 @@ D_i_i3 = aug_pc_map(:,1:end-2,:) - aug_pc_map(:,2:end-1,:);
 D_i_i4(1:end-1,:,:) = pc_map(2:end,:,:)-pc_map(1:end-1,:,:);
 
 %Unit distance vectors
-D_i_i1_unit = D_i_i1./sqrt(sum(D_i_i1.^2,3));
-D_i_i2_unit = D_i_i2./sqrt(sum(D_i_i2.^2,3));
-D_i_i3_unit = D_i_i3./sqrt(sum(D_i_i3.^2,3));
-D_i_i4_unit = D_i_i4./sqrt(sum(D_i_i4.^2,3));
+D_i_i1_unit = D_i_i1./repmat(sqrt(sum(D_i_i1.^2,3)),[1 1 3]);
+D_i_i2_unit = D_i_i2./repmat(sqrt(sum(D_i_i2.^2,3)),[1 1 3]);
+D_i_i3_unit = D_i_i3./repmat(sqrt(sum(D_i_i3.^2,3)),[1 1 3]);
+D_i_i4_unit = D_i_i4./repmat(sqrt(sum(D_i_i4.^2,3)),[1 1 3]);
 
 %Neighborhood confidence
 C_i_i1 = exp(-theta3*asin(abs(dot(D_i_i1_unit,pc_normals,3))).^2);
