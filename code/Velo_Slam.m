@@ -30,7 +30,7 @@ theta1 = 4;
 theta2 = 1;
 theta3 = 0.5;
 theta4 = 0.3;
-pt_th = 0.0001; %need to fine tune this
+pt_th = 0.001; %need to fine tune this
 positions = zeros(T, 3);
 
 %==== Set downsampling ratio for ICP ====

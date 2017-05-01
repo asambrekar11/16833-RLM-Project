@@ -30,7 +30,7 @@ function [fusion_map, next_ref_points, next_ref_normals] = velo_mapping(fusion_m
     input_range = input_range(valid_idx);
     
     %===============Input to shreyans function============%
-    trans_data = struct('pointcloud', trans_pointcloud_vec, 'normals', trans_normals_vec,'ccount', input_ccount, 'range', input_range);
+    trans_data = struct('pointcloud', trans_pointcloud_vec, 'normals', trans_normals_vec,'ccounts', input_ccount, 'range', input_range);
     
     %==========KD Tree Object =============%
     Mdl = KDTreeSearcher(fusion_map.pointcloud.Location);
@@ -38,11 +38,10 @@ function [fusion_map, next_ref_points, next_ref_normals] = velo_mapping(fusion_m
     [Idx,D] = knnsearch(Mdl,knn_points,'K',4,'IncludeTies',false);
     
     %==========Shreyans: call your function here(You can use fusion_map, trans_data, Idx, flag, valid_idx, theta4, pt_th(for projected point matching))==========%
-    
-    
+    [ fusion_map, next_ref_data ] = update_fusion_map( fusion_map, trans_data, Idx, theta4, pt_th);
     
     next_ref_points = zeros(h*w,3);
-    next_ref_points(valid_idx,:) = trans_pointcloud_vec.Location;%update_points;
+    next_ref_points(valid_idx,:) = next_ref_data.pointcloud.Location;
     next_ref_points = reshape(next_ref_points,[h,w,3]); 
     
     next_ref_normals = trans_normals;
