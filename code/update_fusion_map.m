@@ -2,7 +2,7 @@ function [ new_fusion_map, ref_vec_pt_cloud ] = update_fusion_map( fusion_map,ve
 %Updating the fusion map with current point cloud
 % For reference:
 % fusion_map = struct('pointcloud', map_pointcloud, 'normals', map_normals,'ccounts', map_ccount,'range', map_range);
-
+thresh_a = 0.1;
 
 %Defining size of the weights- 
 w_ij = zeros(size(vec_pt_cloud.normals,1),size(KD_tree_idx,2));
@@ -16,7 +16,7 @@ Ni_nj = dot(kron(vec_pt_cloud.normals,ones(size(KD_tree_idx,2),1)),fusion_map.no
 Ni_nj = reshape(Ni_nj,[size(KD_tree_idx,2),size(vec_pt_cloud.normals,1)])';
 w_ij = Ci_cj.*Ni_nj;
 
-Pi_j_dot_nj = dot(kron(vec_pt_cloud.pointcloud.Location,ones(size(KD_tree_idx,2),1))-fusion_map.pointcloud.Location(vector_KD_idx,:),fusion_map.normals(vector_KD_idx,:),2);
+Pi_j_dot_nj = -dot(kron(vec_pt_cloud.pointcloud.Location,ones(size(KD_tree_idx,2),1))-fusion_map.pointcloud.Location(vector_KD_idx,:),fusion_map.normals(vector_KD_idx,:),2);
 Pi_j_dot_nj = reshape(Pi_j_dot_nj,[size(KD_tree_idx,2),size(vec_pt_cloud.normals,1)])';
 
 a = sum(2*w_ij.*Pi_j_dot_nj.*Ni_nj,2)./sum(2*w_ij.*Ni_nj.^2,2);
@@ -39,7 +39,7 @@ flag_range = (1-(fusion_map.range(KD_tree_idx(linear_idx))./vec_pt_cloud.range) 
 
 %Update the point if valid, close enough neighbors in the surface and high
 %confidence in the range measurement
-flag_update = and(closest_KD < thresh_dist2,flag_range);
+flag_update = and(and(closest_KD < thresh_dist2,flag_range),abs(a)<thresh_a);
 flag_new_points = ~flag_update;
 idx_update_points = find(flag_update);
 idx_new_points = find(flag_new_points);

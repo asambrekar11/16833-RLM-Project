@@ -31,12 +31,12 @@ theta2 = 1;
 theta3 = 0.005;
 theta4 = -100;
 pt_th = 0.1; %need to fine tune this
-positions = zeros(100, 3);
+positions = zeros(30, 3);
 
 %==== Set downsampling ratio for ICP ====
 ds_ratio = 9;
 num_pt_cloud = 0;
-for t = 1:100
+for t = 1:
    
     %==== Display frame# ====
     fprintf('Frame#: %d', t);
